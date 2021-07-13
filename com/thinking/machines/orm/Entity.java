@@ -5,6 +5,7 @@ public class Entity
 {
 private InsertWrapper insertWrapper;
 private UpdateWrapper updateWrapper;
+private DeleteWrapper deleteWrapper;
 public Entity()
 {
 }
@@ -23,5 +24,13 @@ this.updateWrapper=updateWrapper;
 public UpdateWrapper getUpdateWrapper()
 {
 return this.updateWrapper;
+}
+public void setDeleteWrapper(DeleteWrapper deleteWrapper)
+{
+this.deleteWrapper=deleteWrapper;
+}
+public DeleteWrapper getDeleteWrapper()
+{
+return this.deleteWrapper;
 }
 }
