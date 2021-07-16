@@ -3,11 +3,21 @@ import com.thinking.machines.orm.wrapper.*;
 import com.thinking.machines.orm.exceptions.*;
 public class Entity
 {
+private Object entityObject;
 private InsertWrapper insertWrapper;
 private UpdateWrapper updateWrapper;
 private DeleteWrapper deleteWrapper;
+private SelectWrapper selectWrapper;
 public Entity()
 {
+}
+public void setEntityObject(Object entityObject)
+{
+this.entityObject=entityObject;
+}
+public Object getEntityObject()
+{
+return this.entityObject;
 }
 public void setInsertWrapper(InsertWrapper insertWrapper)
 {
@@ -32,5 +42,13 @@ this.deleteWrapper=deleteWrapper;
 public DeleteWrapper getDeleteWrapper()
 {
 return this.deleteWrapper;
+}
+public void setSelectWrapper(SelectWrapper selectWrapper)
+{
+this.selectWrapper=selectWrapper;
+}
+public SelectWrapper getSelectWrapper()
+{
+return this.selectWrapper;
 }
 }

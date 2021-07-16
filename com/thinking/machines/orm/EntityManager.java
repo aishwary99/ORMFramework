@@ -21,6 +21,8 @@ private ColumnWrapper columnWrapper;
 private Object object;
 private List<Pair<Field,Method>> pojoGetterMethods;
 private Map<Class,Method> preparedStatementSetterMethods;
+private List<Pair<Field,Method>> pojoSetterMethods;
+private Map<Class,Method> resultSetGetterMethods;
 public EntityManager(Connection connection)
 {
 this.connection=connection;
@@ -32,6 +34,7 @@ try
 {
 this.object=object;
 entity=new Entity();
+entity.setEntityObject(object);
 prepareDataStructures(object);
 if(operationType.equals(operationType.INSERT))
 {
@@ -48,11 +51,39 @@ else if(operationType.equals(operationType.DELETE))
 DeleteWrapper deleteWrapper=getDeleteWrapper(object);
 entity.setDeleteWrapper(deleteWrapper);
 }
+else if(operationType.equals(operationType.SELECT))
+{
+SelectWrapper selectWrapper=getSelectWrapper(object);
+entity.setSelectWrapper(selectWrapper);
+}
 }catch(Exception exception)
 {
 }
 return entity;
 }
+public SelectWrapper getSelectWrapper(Object object) throws ORMException
+{
+SelectWrapper selectWrapper=new SelectWrapper();
+Class c=object.getClass();
+Annotation [] classLevelAnnotations=c.getDeclaredAnnotations();
+if(classLevelAnnotations.length>0)
+{
+for(Annotation classLevelAnnotation:classLevelAnnotations)
+{
+if(classLevelAnnotation instanceof Table)
+{
+Table table=(Table) classLevelAnnotation;
+selectWrapper.setTableName(table.name());
+break;
+}
+}
+}
+selectWrapper.setPOJOGetterMethods(pojoGetterMethods);
+selectWrapper.setPreparedStatementSetterMethods(preparedStatementSetterMethods);
+selectWrapper.setPOJOSetterMethods(pojoSetterMethods);
+selectWrapper.setResultSetGetterMethods(resultSetGetterMethods);
+return selectWrapper;
+}//end of function
 public DeleteWrapper getDeleteWrapper(Object object) throws ORMException
 {
 DeleteWrapper deleteWrapper=new DeleteWrapper();
@@ -221,13 +252,17 @@ typeResolverMap.put("double",Class.forName("java.lang.Double"));
 typeResolverMap.put("char",Class.forName("java.lang.String"));
 typeResolverMap.put("byte",Class.forName("java.lang.Byte"));
 typeResolverMap.put("boolean",Class.forName("java.lang.Boolean"));
+typeResolverMap.put("date",Class.forName("java.sql.Date"));
 
 preparedStatementSetterMethods=new HashMap<>();
+resultSetGetterMethods=new HashMap<>();
 pojoGetterMethods=new LinkedList<>();
+pojoSetterMethods=new LinkedList<>();
 
 List<Field> entityFields=new LinkedList<>();
 List<Method> entityMethods=new LinkedList<>();
 List<Method> entityGetterMethods=new LinkedList<>();
+List<Method> entitySetterMethods=new LinkedList<>();
 
 Class c=Class.forName(object.getClass().getName());
 Field [] fields=c.getDeclaredFields();
@@ -238,7 +273,6 @@ for(Method method:methods)
 {
 if(method.getName().startsWith("get")) entityMethods.add(method);
 }
-
 for(int i=0;i<entityFields.size();i++)
 {
 String fieldName=entityFields.get(i).getName().toLowerCase();
@@ -253,7 +287,38 @@ for(int i=0;i<entityFields.size();i++)
 Pair<Field,Method> pair=new Pair<Field,Method>(entityFields.get(i),entityGetterMethods.get(i));
 pojoGetterMethods.add(pair);
 }
+for(Field field:entityFields)
+{
+String fieldName=field.getName();
+for(Method method:methods)
+{
+String methodName=method.getName();
+if(methodName.startsWith("get")) continue;
+if(methodName.substring(methodName.indexOf("t")+1).equalsIgnoreCase(fieldName)==false) continue;
+pojoSetterMethods.add(new Pair<Field,Method> (field,method));
+}
+}
 //List -> Pair<Field,Method> is populated
+
+//code to populate resultSetGetterMethods starts here...
+Class resultSetClass=Class.forName("java.sql.ResultSet");
+Method resultSetMethods[]=resultSetClass.getDeclaredMethods();
+for(Method resultSetMethod:resultSetMethods)
+{
+if(resultSetMethod.getName().startsWith("get")==false) continue;
+Class returnTypeClass=null;
+if(typeResolverMap.containsKey(resultSetMethod.getReturnType()))
+{
+returnTypeClass=typeResolverMap.get(resultSetMethod.getReturnType());
+}
+else returnTypeClass=resultSetMethod.getReturnType();
+Class prms[]=resultSetMethod.getParameterTypes();
+if(prms.length!=1) continue;
+if(prms[0].getSimpleName().equalsIgnoreCase("string")==false) continue;
+if(resultSetGetterMethods.containsKey(returnTypeClass)) continue;
+resultSetGetterMethods.put(returnTypeClass,resultSetMethod);
+}//end of for
+//code to populate resultSetGetterMethods ends  here...
 
 //populating for ps list starts here....
 Class ps=Class.forName("java.sql.PreparedStatement");

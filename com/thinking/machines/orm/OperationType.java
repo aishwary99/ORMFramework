@@ -3,5 +3,6 @@ public enum OperationType
 {
 INSERT,
 UPDATE,
-DELETE
+DELETE,
+SELECT
 }

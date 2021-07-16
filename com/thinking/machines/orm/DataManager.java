@@ -5,6 +5,7 @@ import com.thinking.machines.orm.utilities.*;
 import com.thinking.machines.orm.generator.*;
 import com.thinking.machines.orm.annotations.*;
 import com.thinking.machines.orm.validators.*;
+import com.thinking.machines.orm.query.*;
 import java.sql.*;
 import java.util.*;
 import javafx.util.*;	//for pair
@@ -43,6 +44,19 @@ connection.setAutoCommit(false);
 throw new ORMException(sqlException.getMessage());
 }
 }
+public <T> Select<T> select(Object object) throws ORMException
+{
+if(connection==null) throw new ORMException("Call to begin is missing");
+try
+{
+entity=entityManager.loadEntity(object,OperationType.SELECT);
+Select<T> selectClass=new Select<T>(connection,entity);
+return selectClass;
+}catch(Exception exception)
+{
+throw exception;
+}
+}//end of function
 public Integer save(Object object) throws ORMException
 {
 entity=entityManager.loadEntity(object,OperationType.INSERT);
