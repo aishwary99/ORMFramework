@@ -20,6 +20,104 @@ take care of creating POJO's all from scratch just by analyzing Tables & will do
 * Include ORM.jar at compile time & runtime
 * Create conf.json file in current working directory having JSON formatting similar to conf.json of master branch
 
+## Test Cases
+
+* Save
+```
+DataManager dataManager=new DataManager();
+dataManager.begin();
+Vehicle vehicle=new Vehicle();
+vehicle.setCode(101);
+vehicle.setName("Sonet");
+vehicle.setBrandName("Kia");
+vehicle.setColor("Red");
+dataManager.save(vehicle);
+dataManager.end();
+```
+* Update 
+```
+DataManager dataManager=new DataManager();
+dataManager.begin();
+Animal animal=new Animal();
+animal.setName("Turtle Hanky");
+animal.setType("Reptile");
+animal.setAge(53);
+dataManager.update(animal);
+dataManager.end();
+```
+* Delete
+```
+DataManager dataManager=new DataManager();
+dataManager.begin();
+Vehicle vehicle=new Vehicle();
+vehicle.setCode(201);			//the record having primary key column as code & value as 201
+dataManager.update(animal);
+dataManager.end();
+```
+* Select
+
+   * Select Using Statement
+   
+   ```
+   DataManager dataManager=new DataManager();
+   dataManager.begin();
+   List<Object> animals=dataManager.select(new Animal()).fire();
+   for(Object object:animals)
+   {
+   Animal animal=(Animal) object;
+   System.out.println("Name : "+animal.getName());
+   System.out.println("Type : "+animal.getType());
+   System.out.println("Age : "+animal.getAge());
+   }
+   dataManager.end();
+   ```
+   
+   * Select Using Prepared Statement
+
+   ```
+   DataManager dataManager=new DataManager();
+   dataManager.begin();
+   List<Object> vehicles=dataManager.select(new Vehicle()).where("vehicleCode").eq(101).fire();    //eq for equals
+   dataManager.end();
+   ```
+   
+   ```
+   DataManager dataManager=new DataManager();
+   dataManager.begin();
+   List<Object> vehicles=dataManager.select(new Vehicle()).where("vehicleCode").ne(101).fire();    //ne for not equals
+   dataManager.end();
+   ```
+   
+   ```
+   DataManager dataManager=new DataManager();
+   dataManager.begin();
+   List<Object> vehicles=dataManager.select(new Vehicle()).where("vehiclePrice").lt(1500000).fire();    //lt for less than
+   dataManager.end();
+   ```
+   
+   ```
+   DataManager dataManager=new DataManager();
+   dataManager.begin();
+   List<Object> vehicles=dataManager.select(new Vehicle()).where("vehiclePrice").gt(2000000).fire();    //gt for greater than
+   dataManager.end();
+   ```
+   
+   
+   ```
+   DataManager dataManager=new DataManager();
+   dataManager.begin();
+   List<Object> vehicles=dataManager.select(new Vehicle()).where("vehiclePrice").le(7000000).fire();    //le for less than equal to
+   dataManager.end();
+   ```
+   
+   
+   ```
+   DataManager dataManager=new DataManager();
+   dataManager.begin();
+   List<Object> vehicles=dataManager.select(new Vehicle()).where("vehiclePrice").ge(7000000).fire();    //ge for greater than equal to
+   dataManager.end();
+   ```
+
 ## Version History
 * 0.2 - Upcoming
     * Logger facility
