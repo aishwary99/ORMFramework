@@ -51,7 +51,7 @@ DataManager dataManager=new DataManager();
 dataManager.begin();
 Vehicle vehicle=new Vehicle();
 vehicle.setCode(201);			//the record having primary key column as code & value as 201
-dataManager.update(animal);
+dataManager.delete(vehicle);
 dataManager.end();
 ```
 * Select
